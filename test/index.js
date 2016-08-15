@@ -2,30 +2,19 @@ import assert from 'assert';
 import path from 'path';
 import fs from 'fs';
 import plugin from '../src/index';
-import { transformFileSync } from 'babel-core';
-import Module from 'module';
+import { transform } from 'babel-core';
 
-describe('cherry-picked modular builds', () => {
-
-  it('should work with cherry-pick modular builds', () => {
+describe('actual builded code', () => {
+  it('should strictEqual to expected code', (done) => {
     const actualPath = path.join(__dirname, 'feature/actual.js');
-    const expectedPath = path.join(__dirname, 'feature/expect.js');
+    const code = fs.readFileSync(actualPath).toString();
 
-    const actual = transformFileSync(actualPath, {
-      'plugins': [plugin],
-    }).code;
-    const expected = fs.readFileSync(expectedPath, 'utf8');
-
-    assert.strictEqual(actual.trim(), expected.trim());
-  });
-
-  it('should throw an error', () => {
-    const errorPath = path.join(__dirname, 'error/actual.js');
-
-    assert.throws(function() {
-      transformFileSync(errorPath, {
-        'plugins': [plugin],
-      }).code;
+    const actual = transform(code, {
+      presets: ['react'],
+      plugins: [plugin],
     });
+    const expectedCode = fs.readFileSync(path.join(__dirname, 'feature/expected.js')).toString();
+    assert.strictEqual(actual.code.trim(), expectedCode.trim());
+    done();
   });
 });

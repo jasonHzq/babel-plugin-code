@@ -1,6 +1,6 @@
 {
-  "name": "@ali/babel-plugin-ebase",
-  "version": "1.0.0",
+  "name": "babel-plugin-code",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -9,36 +9,20 @@
   },
   "keywords": [
     "babel-plugin",
-    "@ali/op-ebase",
-    "modules"
+    "code"
   ],
   "author": "jasonHzq",
   "license": "MIT",
   "devDependencies": {
-    "@ali/op-ebase": "^1.2.5",
-    "babel-cli": "^6.9.0",
+    "babel-cli": "^6.11.4",
     "babel-core": "^6.9.0",
-    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-react": "^6.11.1",
     "babel-preset-stage-0": "^6.5.0",
-    "mocha": "^2.4.5"
-  },
-  "babel": {
-    "presets": [
-      "es2015",
-      "stage-0"
-    ]
+    "mocha": "^3.0.1"
   },
   "files": [
     "lib",
     "*.md"
-  ],
-  "dependencies": {
-    "babel-traverse": "^6.9.0",
-    "babel-types": "^6.9.0",
-    "babylon": "^6.8.0",
-    "cherry-pick-babel-plugin-generator": "^1.0.3"
-  },
-  "publishConfig": {
-    "registry": "http://registry.npm.alibaba-inc.com"
-  }
+  ]
 }

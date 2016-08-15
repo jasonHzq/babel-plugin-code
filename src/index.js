@@ -1,75 +1,41 @@
-import Module from 'module';
-import * as babylon from "babylon";
-import traverse from "babel-traverse";
-import pluginGenerator from 'cherry-pick-babel-plugin-generator';
-import path from 'path';
-import fs from 'fs';
-import * as t from 'babel-types';
+export default function ({ types: t }) {
+  return {
+    visitor: {
+      ExportNamedDeclaration(path) {
+        const { node } = path;
+        const { declaration } = node;
 
-const pkgName = '@ali/op-ebase';
-
-const _module = new Module();
-
-const pkgPath = path.dirname(Module._resolveFilename(pkgName, {
-  ..._module,
-  paths: Module._nodeModulePaths(process.cwd()),
-}));
-
-const code = fs.readFileSync(pkgPath + '/index.js', 'utf-8');
-
-const ast = babylon.parse(code, {
-  sourceType: 'module',
-  presets: ['es2015'],
-});
-
-const pkgMap = {};
-const exportPkgMap = {};
-
-traverse(ast, {
-  ImportDeclaration(path) {
-    const { node } = path;
-    const { source, specifiers } = node;
-    const modulePath = source.value;
-    const moduleName = modulePath.indexOf('./') === 0 ?
-      pkgName + '/src' + modulePath.slice(1) :
-      modulePath;
-    
-    specifiers.forEach(spec => {
-      const { local, imported } = spec;
-
-      if (t.isImportSpecifier(spec)) {
-        const localName = local.name;
-        const importName = imported.name;
-
-        pkgMap[localName] = [moduleName, importName];
-      } else if (t.isImportDefaultSpecifier(spec)) {
-        const localName = local.name;
-
-        pkgMap[localName] = [moduleName];
-      }
-    });
-  },
-
-  AssignmentExpression(path) {
-    const { node } = path;
-    const { left, right } = node;
-
-    if (t.isMemberExpression(left) && left.object.name === 'module') {
-      const { properties } = right;
-
-      properties.forEach(prop => {
-        const { key, value } = prop;
-        const keyName = key.name;
-        const valueName = value.name;
-        
-        if (pkgMap[valueName]) {
-          exportPkgMap[keyName] = pkgMap[valueName];
+        if (!declaration) {
+          return;
         }
-      });
+
+        const { loc } = node;
+        const { start: { line: sline }, end: { line: eline } } = loc;
+        const fileCode = path.hub.file.code;
+        const code = fileCode.split('\n').slice(Math.max(sline - 1, 0), eline).join('\n');
+
+        const { id, superClass, body, decorators } = declaration;
+        const isFunc = t.isFunctionDeclaration(declaration);
+        const isClass = t.isClassDeclaration(declaration);
+
+        let member = null;
+        let exportSpec = null;
+        let exportDec = null;
+        let assign = null;
+
+        if (isFunc || isClass) {
+          path.replaceWith(declaration);
+
+          member = t.MemberExpression(id, t.Identifier('codeSelf'));
+          assign = t.AssignmentExpression('=', member, t.StringLiteral(code));
+
+          exportSpec = t.ExportSpecifier(id, id);
+          exportDec = t.ExportNamedDeclaration(null, [exportSpec]);
+
+          path.insertAfter(exportDec);
+          path.insertAfter(t.ExpressionStatement(assign));
+        }
+      }
     }
   }
-});
-
-export default pluginGenerator({[pkgName]: exportPkgMap});
-
-
+}
