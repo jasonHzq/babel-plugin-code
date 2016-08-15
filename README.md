@@ -1,11 +1,9 @@
-# @ali/babel-plugin-oneui
-
-A babel cherry-pick plugin which can import less modules.
+# babel-plugin-code
 
 
 ## install
 ```
-$ tnpm i -D @ali/babel-plugin-oneui
+$ npm i -D babel-plugin-code
 ```
 
 ## Usage
@@ -14,11 +12,8 @@ $ tnpm i -D @ali/babel-plugin-oneui
 
 ```
 {
-  "plugins": ["oneui"]
+  "plugins": ["code"]
 }
 ```
 
-## Limitations
-
-* You must use ES2015 imports to load module
 
